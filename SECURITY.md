@@ -5,12 +5,37 @@
 - **No circomlib dependency**: This library is self-contained. Same algorithms (e.g. Poseidon) use the same constants as the public spec; verify hashing test vectors if you need cross-project compatibility.
 - **Constraint system**: All templates are written to produce valid R1CS; use trusted setup and verification keys.
 
+## Pre-deployment checklist
+
+Wiring and configuration errors cause more production failures than broken hash functions. Work through this list before a trusted setup.
+
+### Before trusted setup
+
+- [ ] All untrusted inputs use `StrictNum2Bits` or `RangeProof`
+- [ ] Comparator `n` is at least the bit width of the maximum input value
+- [ ] Selectors (`sel`, `condition`, `enabled`) are binary-constrained (`Safe*` or an explicit `x*(x-1)===0`)
+- [ ] Merkle roots committed on-chain match the circuit public inputs
+- [ ] Each nullifier uses a unique `externalNullifier` per action or domain
+- [ ] No secret signals are marked public
+- [ ] Poseidon width is consistent across prover, verifier, and any off-chain tree
+- [ ] Run `opencircom audit` in CI when that command is available (`#2`)
+
+### Known building blocks that require wrappers
+
+Raw `AND`, `OR`, `XOR`, `NOT`, `NAND`, `NOR`, `Mux1`, `Mux2`, `MultiMux1`, `MultiMux2`, and `Bits2Num` do **not** binary-constrain inputs (0.5.0 audit). Prefer `SafeAND`, `SafeOR`, `SafeMux1`, `SafeMux2`, `SafeBits2Num`. Remaining Safe* wrappers are tracked in `#38`.
+
+### References
+
+- Underconstrained-circuit incidents (ZK Hack writeups)
+- opencircom CHANGELOG 0.5.0, 0.8.0, 0.8.1
+
 ## Per-component notes
 
-### Comparators (`LessThan`, `GreaterThan`, etc.)
+### Comparators (`LessThan`, `GreaterThan`, `AgeThresholdProof`, etc.)
 
 - Parameter `n`: inputs must be in range `[0, 2^n - 1]`. Use `n` large enough (e.g. 64 or 253) for your application.
 - `IsZero` uses a witness for the inverse; ensure your backend produces valid proofs.
+- `AgeThresholdProof(n)` only checks `currentYear - birthYear >= minAge`. Treat `currentYear` and `minAge` as a **trust-model** input (public signal or authenticated oracle). The circuit does not prove that the year is wall-clock time. A future `birthYear` is rejected; an under-age witness yields `valid=0`.
 
 ### Bitify (`Num2Bits`, `Bits2Num`, `SafeBits2Num`)
 

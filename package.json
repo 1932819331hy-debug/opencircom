@@ -1,6 +1,6 @@
 {
   "name": "opencircom",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "Reusable Circom ZK circuit templates — hashing, comparators, Merkle trees, and more. No dependency on circomlib.",
   "main": "index.js",
   "bin": {
