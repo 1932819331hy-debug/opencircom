@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.0
+
+- Identity: `AgeThresholdProof(n)` — `valid=1` iff `currentYear - birthYear >= minAge`; `StrictNum2Bits(n)` on all inputs; hard-constrains `currentYear >= birthYear` to block Fr wraparound. `#11`
+- Utils: `SortedCheck(n, nBits)` — `out=1` iff the array is non-decreasing (389 constraints at n=8/nBits=16; 1613 at n=32/nBits=16). `#9`
+- Utils: `IsPermutation(n, nBits)` — private index permutation proving `b` is a reordering of `a` (308 constraints at n=8/nBits=3; 4112 at n=32/nBits=5). `#9`
+- Docs: pre-deployment security checklist in SECURITY.md (`#22`); year-source trust model for AgeThresholdProof; README/docs bumped to 0.9.0.
+
 ## 0.8.1
 
 - Security: `VoteCommit` now `StrictNum2Bits(32)`-bounds `choice` before `LessThan(32)` (Fr wraparound could previously satisfy the range check). `#36`

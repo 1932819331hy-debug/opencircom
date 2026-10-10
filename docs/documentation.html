@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="OpenCircom v0.8.1 documentation — installation, CLI, Hardhat/Foundry integration, security, and full circuit template reference." />
+  <meta name="description" content="OpenCircom v0.9.0 documentation — installation, CLI, Hardhat/Foundry integration, security, and full circuit template reference." />
   <title>Documentation — OpenCircom</title>
   <link rel="icon" href="assets/img/logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,12 +40,12 @@
       <header class="docs-header">
         <p class="section-label">Documentation</p>
         <h1>OpenCircom reference</h1>
-        <p class="docs-lead">v0.8.1 — 101 circuit templates, CLI tooling, integration guides, and auto-generated template reference from <code>circuits/**/*.circom</code>.</p>
+        <p class="docs-lead">v0.9.0 — 104 circuit templates, CLI tooling, integration guides, and auto-generated template reference from <code>circuits/**/*.circom</code>.</p>
       </header>
 
       <section class="docs-section" id="overview">
         <h2>Overview</h2>
-        <p>OpenCircom is a library of reusable <strong>Circom 2.x</strong> templates for zero-knowledge applications: hashing (Poseidon, MiMC, SHA-256), comparators, Merkle proofs, identity (Semaphore-style), voting, MACI v1 building blocks, and utilities. There is <strong>no dependency on circomlib</strong>; implementations are self-contained and covered by 163+ real Groth16 tests.</p>
+        <p>OpenCircom is a library of reusable <strong>Circom 2.x</strong> templates for zero-knowledge applications: hashing (Poseidon, MiMC, SHA-256), comparators, Merkle proofs, identity (Semaphore-style), voting, MACI v1 building blocks, and utilities. There is <strong>no dependency on circomlib</strong>; implementations are self-contained and covered by 178+ real Groth16 tests.</p>
         <p>Install via npm, add the circuits folder to your Circom include path (<code>-l</code>), and compose templates in your own circuits. Use the <a href="https://github.com/jose-compu/opencircom-hardhat-boilerplate" target="_blank" rel="noopener">Hardhat</a> or <a href="https://github.com/jose-compu/opencircom-foundry-boilerplate" target="_blank" rel="noopener">Foundry</a> boilerplates for a full compile → verifier → test pipeline.</p>
       </section>
 
@@ -53,7 +53,7 @@
         <h2>Installation</h2>
         <pre class="code-block"><code class="language-bash">npm install opencircom</code></pre>
         <p>Peer dependency: <strong>circom 2.x</strong> must be installed and available on <code>PATH</code>. OpenCircom does not bundle the compiler.</p>
-        <p>Package version: <code>^0.8.1</code>. Circuits live under <code>node_modules/opencircom/circuits/</code>.</p>
+        <p>Package version: <code>^0.9.0</code>. Circuits live under <code>node_modules/opencircom/circuits/</code>.</p>
       </section>
 
       <section class="docs-section" id="includes">
@@ -97,7 +97,7 @@ npx opencircom path</code></pre>
 
       <section class="docs-section" id="cli-ref">
         <h2>CLI reference</h2>
-        <p>The <code>opencircom</code> CLI ships with the npm package (v0.7.0+; current <code>^0.8.1</code>):</p>
+        <p>The <code>opencircom</code> CLI ships with the npm package (v0.7.0+; current <code>^0.9.0</code>):</p>
         <div class="docs-table-wrap">
           <table class="docs-table">
             <thead><tr><th>Command</th><th>Description</th></tr></thead>
@@ -128,10 +128,11 @@ npm test</code></pre>
         <ul class="docs-list">
           <li><strong>Range checks:</strong> Use <code>StrictNum2Bits(n)</code> or <code>RangeProof(n)</code> for untrusted inputs; <code>LessThan(n)</code> assumes inputs &lt; 2<sup>n</sup>.</li>
           <li><strong>Binary selectors / bits:</strong> Prefer <code>SafeAND</code>, <code>SafeOR</code>, <code>SafeMux1</code>, <code>SafeMux2</code>, <code>SafeBits2Num(n)</code> for untrusted inputs. Raw AND/OR/Mux1/Mux2/Bits2Num are building blocks without binary constraints.</li>
+          <li><strong>Age proofs:</strong> <code>AgeThresholdProof</code> only checks year arithmetic; <code>currentYear</code> / <code>minAge</code> must come from a trusted source.</li>
           <li><strong>Merkle:</strong> <code>pathIndices[i]</code> are constrained binary in-circuit; <code>Switcher</code> constrains <code>sel</code> to {0,1}.</li>
           <li><strong>Nullifier:</strong> Use a unique <code>externalNullifier</code> per action to avoid cross-action replay.</li>
           <li><strong>Hashing:</strong> Poseidon uses standard Hades parameters; constants in <code>circuits/hashing/poseidon_constants.circom</code>.</li>
-          <li><strong>Audit (0.5.0) / Safe wrappers (0.8.0) / range checks (0.8.1):</strong> Binary constraints and range checks hardened in Switcher, ForceEqualIfEnabled, IncrementalMerkleInclusion, DivRem, and PadPKCS7; Safe* templates added for gates, mux, and Bits2Num; VoteCommit choice and MACI nonce bounded against Fr wraparound.</li>
+          <li><strong>Audit (0.5.0) / Safe wrappers (0.8.0) / range checks (0.8.1) / AgeThreshold (0.9.0):</strong> Binary constraints and range checks hardened in Switcher, ForceEqualIfEnabled, IncrementalMerkleInclusion, DivRem, and PadPKCS7; Safe* templates added for gates, mux, and Bits2Num; VoteCommit choice and MACI nonce bounded against Fr wraparound. See the pre-deployment checklist in SECURITY.md.</li>
           <li><strong>MACI:</strong> EdDSA, ECDH shared keys, and full DuplexSponge encryption remain off-circuit (coordinator layer). See <a href="https://maci.pse.dev/docs/v1.2/spec">MACI v1 spec</a>.</li>
         </ul>
         <p>Full notes: <a href="https://github.com/jose-compu/opencircom/blob/main/SECURITY.md">SECURITY.md</a> on GitHub.</p>
@@ -211,7 +212,7 @@ npm test</code></pre>
 
 <section class="docs-category" id="cat-comparators">
 <h2>Comparators &amp; range</h2>
-<p class="docs-category-intro">9 templates in this category.</p>
+<p class="docs-category-intro">10 templates in this category.</p>
 <article class="template-doc" id="LessThan-comparators-circom" data-search="lessthan returns 1 if in[0] &lt; in[1], else 0. comparators.circom n num2bits(n+1): o(n) constraints. both inputs must be &lt; 2^n or result is undefined. enforce input bounds externally (e.g. strictnum2bits) when inputs are untrusted. both inputs must be in [0, 2^n). uses (2^n + in[0] - in[1]) bit decomposition. n bit width (&lt;= 252). in out">
 <h3 class="template-name"><code>LessThan(n)</code></h3>
 <p class="template-notice">Returns 1 if in[0] &lt; in[1], else 0.</p>
@@ -302,6 +303,18 @@ npm test</code></pre>
 <dt>Parameters</dt><dd><ul><li><code>n</code> — Bit width for range (&lt;= 251).</li></ul></dd>
 <dt>Inputs</dt><dd><ul><li><code>x</code> — Value to prove in range.</li><li><code>a</code> — Lower bound (inclusive).</li><li><code>b</code> — Upper bound (inclusive).</li></ul></dd>
 <dt>Outputs</dt><dd><ul><li><code>out</code> — 1 (convenience).</li></ul></dd></dl>
+<p class="template-file">Defined in <code>circuits/comparators.circom</code></p>
+</article>
+<article class="template-doc" id="AgeThresholdProof-comparators-circom" data-search="agethresholdproof returns 1 if currentyear - birthyear &gt;= minage (e.g. 18+, 21+). comparators.circom n 3 strictnum2bits(n) + 2 greatereqthan(n): o(n). currentyear and minage are a trust-model input (oracle or public). the circuit only checks arithmetic; it does not authenticate the year source. range-checks all three inputs with strictnum2bits(n). hard-constrains currentyear &gt;= birthyear so field wraparound cannot invent a huge age. too-young witnesses yield valid=0 rather than a constraint failure. n bit width for years and age (&lt;= 251). use n=16 for calendar years. birthyear currentyear minage valid">
+<h3 class="template-name"><code>AgeThresholdProof(n)</code></h3>
+<p class="template-notice">Returns 1 if currentYear - birthYear &gt;= minAge (e.g. 18+, 21+).</p>
+<p class="template-dev"><strong>Dev:</strong> Range-checks all three inputs with StrictNum2Bits(n). Hard-constrains currentYear &gt;= birthYear so field wraparound cannot invent a huge age. Too-young witnesses yield valid=0 rather than a constraint failure.</p>
+<p class="template-meta"><strong>Complexity:</strong> 3 StrictNum2Bits(n) + 2 GreaterEqThan(n): O(n).</p>
+<p class="template-meta template-security"><strong>Security:</strong> currentYear and minAge are a trust-model input (oracle or public). The circuit only checks arithmetic; it does not authenticate the year source.</p>
+<dl class="template-dl">
+<dt>Parameters</dt><dd><ul><li><code>n</code> — Bit width for years and age (&lt;= 251). Use n=16 for calendar years.</li></ul></dd>
+<dt>Inputs</dt><dd><ul><li><code>birthYear</code> — Birth year (private); must be an n-bit integer.</li><li><code>currentYear</code> — Current year (public or private); must be an n-bit integer and &gt;= birthYear.</li><li><code>minAge</code> — Minimum age inclusive (e.g. 18); must be an n-bit integer.</li></ul></dd>
+<dt>Outputs</dt><dd><ul><li><code>valid</code> — 1 if age &gt;= minAge, else 0.</li></ul></dd></dl>
 <p class="template-file">Defined in <code>circuits/comparators.circom</code></p>
 </article>
 </section>
@@ -540,7 +553,31 @@ npm test</code></pre>
 
 <section class="docs-category" id="cat-utils">
 <h2>Utils</h2>
-<p class="docs-category-intro">15 templates in this category.</p>
+<p class="docs-category-intro">17 templates in this category.</p>
+<article class="template-doc" id="SortedCheck-permutation-circom" data-search="sortedcheck returns 1 if in[] is non-decreasing (in[i] &lt;= in[i+1] for all i). permutation.circom n, nbits n×strictnum2bits(nbits) + (n-1)×lesseqthan(nbits) + multiand(n-1). o(n * nbits). measured: n=8,nbits=16 → 389 constraints; n=32,nbits=16 → 1613 constraints. values must fit nbits; out=0 is a valid witness for an unsorted array (does not hard-fail). each element is strictnum2bits(nbits). adjacent pairs use lesseqthan(nbits); results and together. for n==1, only the range check applies and out=1. n array length (&gt;= 1). nbits bit width of each value (&lt;= 251). in out">
+<h3 class="template-name"><code>SortedCheck(n, nBits)</code></h3>
+<p class="template-notice">Returns 1 if in[] is non-decreasing (in[i] &lt;= in[i+1] for all i).</p>
+<p class="template-dev"><strong>Dev:</strong> Each element is StrictNum2Bits(nBits). Adjacent pairs use LessEqThan(nBits); results AND together. For n==1, only the range check applies and out=1.</p>
+<p class="template-meta"><strong>Complexity:</strong> n×StrictNum2Bits(nBits) + (n-1)×LessEqThan(nBits) + MultiAND(n-1). O(n * nBits). Measured: n=8,nBits=16 → 389 constraints; n=32,nBits=16 → 1613 constraints.</p>
+<p class="template-meta template-security"><strong>Security:</strong> Values must fit nBits; out=0 is a valid witness for an unsorted array (does not hard-fail).</p>
+<dl class="template-dl">
+<dt>Parameters</dt><dd><ul><li><code>n</code> — Array length (&gt;= 1).</li><li><code>nBits</code> — Bit width of each value (&lt;= 251).</li></ul></dd>
+<dt>Inputs</dt><dd><ul><li><code>in[n]</code></li></ul></dd>
+<dt>Outputs</dt><dd><ul><li><code>out</code> — 1 if sorted ascending, else 0.</li></ul></dd></dl>
+<p class="template-file">Defined in <code>circuits/permutation.circom</code></p>
+</article>
+<article class="template-doc" id="IsPermutation-permutation-circom" data-search="ispermutation constrains b[] to be a reordering of a[] via a private index permutation. permutation.circom n, nbits n×selectbyindex(n, nbits) + n(n-1)/2 assertnotequal. o(n^2). measured: n=8,nbits=3 → 308 constraints; n=32,nbits=5 → 4112 constraints. perm is private (order not revealed). invalid or duplicate indices fail constraints. does not sort; pair with sortedcheck when a sorted image is required. for each i, b[i] === a[perm[i]]. each perm[i] is range-checked by selectbyindex(n, nbits). pairwise assertnotequal on perm[] enforces a bijection (multiset-preserving; duplicate values allowed if they appear in both arrays). n array length (&gt;= 2). nbits bit width for perm indices; must satisfy 2^nbits &gt;= n. a b perm">
+<h3 class="template-name"><code>IsPermutation(n, nBits)</code></h3>
+<p class="template-notice">Constrains b[] to be a reordering of a[] via a private index permutation.</p>
+<p class="template-dev"><strong>Dev:</strong> For each i, b[i] === a[perm[i]]. Each perm[i] is range-checked by SelectByIndex(n, nBits). Pairwise AssertNotEqual on perm[] enforces a bijection (multiset-preserving; duplicate values allowed if they appear in both arrays).</p>
+<p class="template-meta"><strong>Complexity:</strong> n×SelectByIndex(n, nBits) + n(n-1)/2 AssertNotEqual. O(n^2). Measured: n=8,nBits=3 → 308 constraints; n=32,nBits=5 → 4112 constraints.</p>
+<p class="template-meta template-security"><strong>Security:</strong> perm is private (order not revealed). Invalid or duplicate indices fail constraints. Does not sort; pair with SortedCheck when a sorted image is required.</p>
+<dl class="template-dl">
+<dt>Parameters</dt><dd><ul><li><code>n</code> — Array length (&gt;= 2).</li><li><code>nBits</code> — Bit width for perm indices; must satisfy 2^nBits &gt;= n.</li></ul></dd>
+<dt>Inputs</dt><dd><ul><li><code>a[n]</code></li><li><code>b[n]</code></li><li><code>perm[n]</code></li></ul></dd>
+<dt>Outputs</dt><dd><ul><li><em>from template body</em></li></ul></dd></dl>
+<p class="template-file">Defined in <code>circuits/permutation.circom</code></p>
+</article>
 <article class="template-doc" id="PadBits-utils-circom" data-search="padbits zero-pads a bit array to a target length. utils.circom n, target n binary constraints + (target-n) zero assignments. o(target). input bits must be constrained 0/1; pad region is fixed zeros. out[i] = in[i] for i &lt; n, out[i] = 0 for i &gt;= n. input bits are constrained to 0 or 1. n current length of input. target output length (&gt;= n). in out">
 <h3 class="template-name"><code>PadBits(n, target)</code></h3>
 <p class="template-notice">Zero-pads a bit array to a target length.</p>
@@ -1138,7 +1175,7 @@ npm test</code></pre>
         <a href="https://www.npmjs.com/package/opencircom">npm</a>
         <a href="https://github.com/jose-compu/opencircom/blob/main/LICENSE">MIT License</a>
       </div>
-      <p class="footer-copy">OpenCircom v0.8.1 · Generated by <code>npm run docs</code></p>
+      <p class="footer-copy">OpenCircom v0.9.0 · Generated by <code>npm run docs</code></p>
     </div>
   </footer>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>

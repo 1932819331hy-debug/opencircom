@@ -172,3 +172,43 @@ template RangeProof(n) {
     leq.out === 1;
     out <== 1;
 }
+
+/**
+ * @title AgeThresholdProof
+ * @notice Returns 1 if currentYear - birthYear >= minAge (e.g. 18+, 21+).
+ * @dev Range-checks all three inputs with StrictNum2Bits(n). Hard-constrains currentYear >= birthYear so field wraparound cannot invent a huge age. Too-young witnesses yield valid=0 rather than a constraint failure.
+ * @param n Bit width for years and age (<= 251). Use n=16 for calendar years.
+ * @custom:input birthYear Birth year (private); must be an n-bit integer.
+ * @custom:input currentYear Current year (public or private); must be an n-bit integer and >= birthYear.
+ * @custom:input minAge Minimum age inclusive (e.g. 18); must be an n-bit integer.
+ * @custom:output valid 1 if age >= minAge, else 0.
+ * @custom:complexity 3 StrictNum2Bits(n) + 2 GreaterEqThan(n): O(n).
+ * @custom:security currentYear and minAge are a trust-model input (oracle or public). The circuit only checks arithmetic; it does not authenticate the year source.
+ */
+template AgeThresholdProof(n) {
+    assert(n >= 1 && n <= 251);
+    signal input birthYear;
+    signal input currentYear;
+    signal input minAge;
+    signal output valid;
+
+    component birthBits = StrictNum2Bits(n);
+    component currentBits = StrictNum2Bits(n);
+    component minBits = StrictNum2Bits(n);
+    birthBits.in <== birthYear;
+    currentBits.in <== currentYear;
+    minBits.in <== minAge;
+
+    component yearOrder = GreaterEqThan(n);
+    yearOrder.in[0] <== currentYear;
+    yearOrder.in[1] <== birthYear;
+    yearOrder.out === 1;
+
+    signal age;
+    age <== currentYear - birthYear;
+
+    component ageOk = GreaterEqThan(n);
+    ageOk.in[0] <== age;
+    ageOk.in[1] <== minAge;
+    valid <== ageOk.out;
+}

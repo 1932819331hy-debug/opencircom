@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Circom](https://img.shields.io/badge/Circom-ZK%20Circuits-8B5CF6)](https://docs.circom.io/)
-[![Tests](https://img.shields.io/badge/tests-163%2B%20passing-success)](./test)
+[![Tests](https://img.shields.io/badge/tests-178%2B%20passing-success)](./test)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.x-brightgreen)](https://nodejs.org/)
 [![No circomlib](https://img.shields.io/badge/deps-no%20circomlib-informational)](./circuits)
 
@@ -54,7 +54,7 @@ From npm:
 npm install opencircom
 ```
 
-Or add to your `package.json`: `"opencircom": "^0.8.1"`.
+Or add to your `package.json`: `"opencircom": "^0.9.0"`.
 
 ### Hardhat
 
@@ -110,6 +110,7 @@ Output markdown is written to **docs/api/**; the HTML documentation page at **do
 | Comparators | `LessThan(n)`, `GreaterThan(n)`, `IsEqual()`, `IsZero()`, `AssertNotEqual()` | Range, equality, aliasing-safe (force a ≠ b). |
 | Comparators | `StrictNum2Bits(n)` | Num2Bits with in ∈ [0, 2^n−1] enforced. |
 | Comparators | `RangeProof(n)` | Prove a ≤ x ≤ b (inputs x, a, b; n-bit range). |
+| Comparators | `AgeThresholdProof(n)` | `valid=1` iff `currentYear - birthYear >= minAge` (years range-checked; currentYear ≥ birthYear). |
 | Bitify    | `Num2Bits(n)`, `Bits2Num(n)`, `SafeBits2Num(n)` | Bit decomposition; `SafeBits2Num` binary-constrains each bit (prefer for untrusted inputs). |
 | Gates     | `AND`, `OR`, `SafeAND`, `SafeOR`, `NOT`, `XOR`, `MultiAND(n)` | Boolean gates; `SafeAND`/`SafeOR` binary-constrain inputs. |
 | Utils     | `Mux1`, `Mux2`, `SafeMux1`, `SafeMux2`, `MuxN` / `SelectByIndex(N, nBits)`, `Switcher` | Multiplexer and conditional swap; Safe* muxes constrain selectors to {0,1}. |
@@ -124,6 +125,7 @@ Output markdown is written to **docs/api/**; the HTML documentation page at **do
 | Utils      | `ConditionalSelect()` | Private if-then-else: out = condition ? a : b (condition 0/1). |
 | Utils      | `BalanceProof(n)` | Prove balance ≥ amount and newBalance = balance − amount; for transfer proofs. |
 | Utils      | `VoteInAllowlist(n)` | 1 if vote in allowedChoices (allowlist voting). |
+| Utils      | `SortedCheck(n, nBits)`, `IsPermutation(n, nBits)` | Prove an array is non-decreasing; prove `b` is a reordering of `a` via a private index permutation. |
 | Merkle    | `MerkleInclusionProof(levels)` | Binary Merkle inclusion. |
 | Merkle    | `AllowlistMembership(levels)` | Prove identity in allowlist (Poseidon(1)(identity) + Merkle path); use with nullifier on-chain. |
 | Merkle    | `SparseMerkleInclusion(levels)`, `SparseMerkleExclusion(levels)` | Sparse Merkle: prove leaf at key equals value, or is empty. |
@@ -145,7 +147,7 @@ Output markdown is written to **docs/api/**; the HTML documentation page at **do
 - **Payments**: Balance proof (`BalanceProof(n)` — balance ≥ amount, newBalance = balance − amount).
 - **Padding**: PadBits, PadBits10Star (1||0*), PadPKCS7 (block bytes).
 - **Symmetric encryption**: Poseidon-based (`PoseidonEncrypt()` — ciphertext = plaintext + Poseidon(key); decryption off-chain).
-- **Identity & credentials**: Semaphore-style commitment (`IdentityCommitment()`, `SemaphoreMembership(levels)` — prove (identity, secret) in allowlist; use with Nullifier). Age/threshold proofs: use `RangeProof(n)` (a = threshold, b = max).
+- **Identity & credentials**: Semaphore-style commitment (`IdentityCommitment()`, `SemaphoreMembership(levels)` — prove (identity, secret) in allowlist; use with Nullifier). Age/threshold: `AgeThresholdProof(n)`.
 - **Voting**: Commit-reveal with nullifier, allowlist variant (`VoteCommitAllowlist`), tally (`Tally`).
 - **MACI**: Command pack/unpack/hash, shared-key binding, message encrypt/decrypt, `MACIVoteCommit`, `MACIVoteDecryptVerify` (MACI v1 layout; EdDSA/ECDH off-circuit).
 - **String & data**: UTF-8 validation (`Utf8Validation(n)`), fixed string match (`FixedStringMatch(n)`), bytes-in-range (`BytesAllInRange(n, lo, hi)`, `ByteInRange(lo, hi)`).
@@ -157,11 +159,12 @@ Planned or community-requested; not yet implemented:
 - **Hashing**: Pedersen (Baby Jubjub) and Keccak-256 are deferred (high constraint cost / implementation effort); Poseidon, MiMC, and SHA-256 remain the supported primitives.
 - **Signatures**: EdDSA verify (Baby JubJub) and ECDSA verify (secp256k1) are deferred (high constraint cost / implementation effort).
 - **Encryption**: ElGamal and ECDH shared secret deferred (curve cost). Symmetric (Poseidon-based) implemented as `PoseidonEncrypt()`.
-- **Identity & credentials**: Semaphore-style commitment implemented (`IdentityCommitment`, `SemaphoreMembership`). Selective disclosure buildable from RangeProof + Merkle + commitments. Age/threshold: use `RangeProof(n)`.
+- **Identity & credentials**: Semaphore-style commitment implemented (`IdentityCommitment`, `SemaphoreMembership`). Age/threshold implemented (`AgeThresholdProof`). Selective disclosure buildable from RangeProof + Merkle + commitments.
+- **Trust / tooling (v0.10.0)**: Constraint-count benchmarks per template (`#13`); Poseidon cross-library compatibility tests vs circomlib (`#19`); remaining Safe* wrappers for XOR/NOT/NAND/NOR and MultiMux (`#38`).
 - **Set membership**: Accumulator-based membership implemented (`AccumulatorMembership(n)`, uses PoEVerify). Merkle/sparse already done.
 - **Payments**: Confidential transfer and mixer (deposit/withdraw) deferred to application repos; build with Merkle, Nullifier, BalanceProof from this lib.
 - **String & data**: UTF-8 validation and simple fixed/range patterns implemented; full regex and JSON field extraction deferred.
-- **Utilities**: Other padding or encoding schemes (e.g. ISO padding, length-prefix, base64 in-circuit) deferred; PadBits, PadBits10Star, PadPKCS7 remain. Safe wrappers for gates/mux/Bits2Num implemented (`SafeAND`, `SafeOR`, `SafeMux1`, `SafeMux2`, `SafeBits2Num`).
+- **Utilities**: Permutation/sort verification implemented (`SortedCheck`, `IsPermutation`). Other padding or encoding schemes (e.g. ISO padding, length-prefix, base64 in-circuit) deferred; PadBits, PadBits10Star, PadPKCS7 remain. Safe wrappers for AND/OR/mux/Bits2Num implemented; remaining Safe* gates/MultiMux tracked as `#38`.
 
 Contributions welcome; open an issue to propose or prioritize.
 
@@ -169,10 +172,11 @@ Contributions welcome; open an issue to propose or prioritize.
 
 - **Range checks**: Use `StrictNum2Bits(n)` or `RangeProof(n)` for untrusted inputs; `LessThan(n)` assumes inputs &lt; 2^n.
 - **Binary selectors / bits**: Prefer `SafeAND`, `SafeOR`, `SafeMux1`, `SafeMux2`, `SafeBits2Num(n)` when inputs may be untrusted. Raw `AND`/`OR`/`Mux1`/`Mux2`/`Bits2Num` are building blocks and do not binary-constrain inputs.
+- **Age proofs**: `AgeThresholdProof` only checks year arithmetic; `currentYear` / `minAge` must come from a trusted source (public input or oracle).
 - **Merkle**: `pathIndices[i]` are constrained binary in-circuit; `Switcher` constrains `sel` to {0,1}.
 - **Nullifier**: Use a unique `externalNullifier` per action to avoid cross-action replay.
 - **Hashing**: Poseidon uses standard Hades parameters (same as circomlib); constants in `circuits/hashing/poseidon_constants.circom`.
-- **Audit**: An internal security audit (0.5.0) fixed binary constraints and range checks in Switcher, ForceEqualIfEnabled, IncrementalMerkleInclusion, DivRem, and PadPKCS7. Safe* wrappers added in 0.8.0. VoteCommit choice and MACI nonce range checks hardened in 0.8.1. See [CHANGELOG](CHANGELOG) for details.
+- **Audit**: An internal security audit (0.5.0) fixed binary constraints and range checks in Switcher, ForceEqualIfEnabled, IncrementalMerkleInclusion, DivRem, and PadPKCS7. Safe* wrappers added in 0.8.0. VoteCommit choice and MACI nonce range checks hardened in 0.8.1. See [CHANGELOG](CHANGELOG) and the pre-deployment checklist in [SECURITY.md](SECURITY.md).
 
 See [SECURITY.md](SECURITY.md) for more.
 
@@ -205,7 +209,7 @@ From this repo, `npm run compile:test` compiles every file in `test/circuits/` b
 
 Tests use **real** ZK where applicable: circuits are compiled with Circom, then a small Powers of Tau and zkey are generated, and a Groth16 proof is created and verified with snarkjs (no mocks).
 
-**Coverage** (163+ tests): Poseidon, PoseidonEncrypt, SHA-256, Comparators, IdentityCommitment, SemaphoreMembership, AccumulatorMembership, Gates (incl. SafeAND/SafeOR), Bitify (incl. SafeBits2Num), Merkle (inclusion, AllowlistMembership, sparse, incremental, update), MiMC, Mux1/Mux2/SafeMux1/SafeMux2, MuxN, Arithmetic (incl. PoEVerify), Utils (PadBits, PadBits10Star, PadPKCS7, OneOfN, IndexOf, Min2, Max2, MinN, MaxN, AllEqual, CountMatches, Tally, ConditionalSelect, BalanceProof, VoteInAllowlist), String (Utf8Validation, FixedStringMatch, BytesAllInRange), Switcher, VoteCommitAllowlist, Nullifier, Voting, MACI, and one full Groth16 prove/verify.
+**Coverage** (178+ tests): Poseidon, PoseidonEncrypt, SHA-256, Comparators (incl. AgeThresholdProof), IdentityCommitment, SemaphoreMembership, AccumulatorMembership, Gates (incl. SafeAND/SafeOR), Bitify (incl. SafeBits2Num), Merkle (inclusion, AllowlistMembership, sparse, incremental, update), MiMC, Mux1/Mux2/SafeMux1/SafeMux2, MuxN, Arithmetic (incl. PoEVerify), Utils (PadBits, PadBits10Star, PadPKCS7, OneOfN, IndexOf, Min2, Max2, MinN, MaxN, AllEqual, CountMatches, Tally, ConditionalSelect, BalanceProof, VoteInAllowlist, SortedCheck, IsPermutation), String (Utf8Validation, FixedStringMatch, BytesAllInRange), Switcher, VoteCommitAllowlist, Nullifier, Voting, MACI, and one full Groth16 prove/verify.
 
 ```bash
 npm install
