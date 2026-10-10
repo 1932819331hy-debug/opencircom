@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Circom](https://img.shields.io/badge/Circom-ZK%20Circuits-8B5CF6)](https://docs.circom.io/)
 [![Tests](https://img.shields.io/badge/tests-178%2B%20passing-success)](./test)
-[![Node](https://img.shields.io/badge/node-%3E%3D18.x-brightgreen)](https://nodejs.org/)
+[![Node](https://img.shields.io/badge/node-%3E%3D18.18-brightgreen)](https://nodejs.org/)
 [![No circomlib](https://img.shields.io/badge/deps-no%20circomlib-informational)](./circuits)
 
 Reusable Circom ZK circuit templates: hashing (Poseidon, MiMC, SHA-256), comparators, Merkle trees, nullifiers, voting, and utilities. No dependency on circomlib. Internal security audit applied in 0.5.0.
@@ -54,7 +54,7 @@ From npm:
 npm install opencircom
 ```
 
-Or add to your `package.json`: `"opencircom": "^0.9.0"`.
+Or add to your `package.json`: `"opencircom": "^0.9.1"`.
 
 ### Hardhat
 
