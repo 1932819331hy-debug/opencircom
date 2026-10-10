@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.1
+
+- DevDependencies: `circom_tester` 0.0.21 → 0.0.24, `mocha` 10.x → 11.8.x, `snarkjs` 0.7.5 → 0.7.6, `chai` range to 4.5.x (chai 5/6 are ESM-only and would break `require()` tests).
+- CI: `actions/checkout` v4 → v5, `actions/setup-node` v4 → v6. Engines `node >=18.18.0` (mocha 11).
+- Left mocha 12 out: it requires Node `^20.19 || >=22.12` and would drop Node 18.
+
 ## 0.9.0
 
 - Identity: `AgeThresholdProof(n)` — `valid=1` iff `currentYear - birthYear >= minAge`; `StrictNum2Bits(n)` on all inputs; hard-constrains `currentYear >= birthYear` to block Fr wraparound. `#11`
